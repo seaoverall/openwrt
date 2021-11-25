@@ -1,0 +1,44 @@
+--- a/drivers/net/ethernet/mtk/esw_rt3050.c
++++ b/drivers/net/ethernet/mtk/esw_rt3050.c
+@@ -616,6 +616,41 @@
+ 
+ 		/* reset EPHY */
+ 		fe_reset(RT5350_RESET_EPHY);
++ 
++		{
++
++			unsigned long t, v;
++			#define RALINK_SYSCTL_BASE		0xB0000000
++			#define RSTCTRL			(RALINK_SYSCTL_BASE + 0x34)
++			#define RT2880_AGPIOCFG_REG	(RALINK_SYSCTL_BASE + 0x3C)
++			#define RALINK_EPHY_RST                 (1<<24)
++
++			//AGPIO
++			#define MT7628_P0_EPHY_AIO_EN          (0x1<<16)
++			#define MT7628_P1_EPHY_AIO_EN          (0x1<<17)
++			#define MT7628_P2_EPHY_AIO_EN          (0x1<<18)
++			#define MT7628_P3_EPHY_AIO_EN          (0x1<<19)
++			#define MT7628_P4_EPHY_AIO_EN          (0x1<<20)
++
++			t = __raw_readl(RT2880_AGPIOCFG_REG);
++			t |= (MT7628_P0_EPHY_AIO_EN | MT7628_P1_EPHY_AIO_EN | MT7628_P2_EPHY_AIO_EN | MT7628_P3_EPHY_AIO_EN | MT7628_P4_EPHY_AIO_EN);
++			t = t & ~(MT7628_P0_EPHY_AIO_EN);
++
++			__raw_writel(t, RT2880_AGPIOCFG_REG);
++
++			t = __raw_readl(RSTCTRL);
++			t = t | RALINK_EPHY_RST;
++			__raw_writel(t, RSTCTRL);
++			t = t & ~(RALINK_EPHY_RST);
++			__raw_writel(t, RSTCTRL);
++
++			t = __raw_readl(RALINK_SYSCTL_BASE + 0x64);
++
++			t &= 0xf003f000;
++			t |= 0x05540550;
++			__raw_writel(t, RALINK_SYSCTL_BASE + 0x64);
++
++		}
+ 
+ 		rt305x_mii_write(esw, 0, 31, 0x2000); /* change G2 page */
+ 		rt305x_mii_write(esw, 0, 26, 0x0020);

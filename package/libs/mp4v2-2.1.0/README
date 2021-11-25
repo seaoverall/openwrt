@@ -1,0 +1,20 @@
+All docs are located in doc/ subdirectory. Useful starting points:
+
+Release Notes           -- doc/ReleaseNotes.txt
+Building the Source     -- doc/BuildSource.txt
+Building the Repository -- doc/BuildRepository.txt
+
+See the COPYING file for license rights and limitations
+
+how to build:
+
+first:
+./configure  CXX=arm-hisiv500-linux-g++ CC=arm-hisiv500-linux-gcc --host=arm-hisiv500-linux --prefix=$PWD/_install --disable-debug --disable-optimize --disable-fvisibility --disable-gch --disable-largefile --disable-util --disable-dependency-tracking --disable-libtool-lock
+
+second:
+make
+
+third:
+make install
+
+you can see an file named _install has built by above action; and the libmp4v2.a libary was in _install/lib Directory

@@ -1,0 +1,7 @@
+config LED_GPIO0
+        tristate "JUST FOR TEST LEN GPIO0 ON OR OFF"
+        depends on LEDS_CLASS
+        depends on LEDS_GPIO
+        depends on GPIOLIB
+        help
+          JUST FOR TEST LEN GPIO0 ON OR OFF

@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# Copyright (C) 2009 OpenWrt.org  (C) 2010 OpenWrt.org.cn
+
+blkdev=`basename $DEVPATH`
+
+#blkdev=$DEVPATH
+
+usbdisk=`basename $blkdev`
+
+result=$(echo $usbdisk | grep "mmc")
+
+if [[ "$result" == "" ]]; then
+   exit 0
+fi
+
+aaa=`echo $blkdev |wc -L`
+
+echo "---------blkdev:$aaa---------------" > /dev/console
+
+#if [ "$blkdev" = "$sdadisk" ]; then
+if [ $aaa -gt 7 -a $aaa -lt 9 ]; then
+
+    device=`basename $DEVPATH`
+    case "$ACTION" in
+        add)
+                mkdir -p /mnt/$device
+                mkdir -p /tmp/run/mountd/$device
+                # vfat & ntfs-3g check
+                if  [ `which fdisk` ]; then
+                        isntfs=`fdisk -l | grep $device | grep NTFS`
+                        isvfat=`fdisk -l | grep $device | grep FAT`
+                        isfuse=`lsmod | grep fuse`
+                        isntfs3g=`which ntfs-3g`
+                else
+                        isntfs=""
+                        isvfat=""
+                fi 
+
+                # mount with ntfs-3g if possible, else with default mount
+                if [ "$isntfs" -a "$isfuse" -a "$isntfs3g" ]; then
+                        #ntfs-3g -o noatime,big_writes,async /dev/$device /mnt/$device
+                        ntfs-3g -o noatime,big_writes,async /dev/$device /tmp/run/mountd/$device
+                elif [ "$isvfat" ]; then
+                        #mount -t vfat -o iocharset=utf8,rw,sync,umask=0000,dmask=0000,fmask=0000 /dev/$device /mnt/$device
+                        mount -t vfat -o iocharset=utf8,rw,sync,umask=0000,dmask=0000,fmask=0000 /dev/$device /tmp/run/mountd/$device
+                else
+                        #mount /dev/$device /mnt/$device
+                        mount /dev/$device /tmp/run/mountd/$device
+                fi
+
+                ;;
+        remove)
+                umount /dev/$device
+                ;;
+    esac
+
+fi
